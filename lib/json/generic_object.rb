@@ -23,6 +23,25 @@ module JSON
   #   result.name  #=> "Jane"
   class GenericObject < OpenStruct
     class << self
+      # Returns the key name used to mark the class identity of a
+      # serialized GenericObject.
+      #
+      # On json 2.x this delegates to `JSON.create_id`; on json 3.x
+      # (where `create_id` was removed) it falls back to the literal
+      # string `"json_class"`.
+      #
+      # Used internally by #json_create and #as_json to read or write
+      # the class tag in the serialized output.
+      #
+      # @return [String] the key name (e.g. `"json_class"`)
+      def json_create_id
+        if ::JSON.respond_to?(:create_id)
+          JSON.create_id
+        else
+          'json_class'
+        end
+      end
+
       # Creates a new GenericObject from a hash of attributes.
       #
       # @return [GenericObject] a new instance
@@ -69,7 +88,7 @@ module JSON
       # @return [GenericObject] a new instance
       def json_create(data)
         data = data.dup
-        data.delete JSON.create_id
+        data.delete JSON::GenericObject.json_create_id
         self[data]
       end
 
@@ -163,7 +182,7 @@ module JSON
     #
     # @return [Hash] a hash with `json_class` and all attributes
     def as_json(*)
-      { JSON.create_id => self.class.name }.merge to_hash
+      { JSON::GenericObject.json_create_id => self.class.name }.merge to_hash
     end
 
     # Serializes this GenericObject to a JSON string.
