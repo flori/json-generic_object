@@ -39,7 +39,7 @@ module JSON
           JSON.create_id
         else
           'json_class'
-        end
+        end.to_s
       end
 
       # Creates a new GenericObject from a hash of attributes.
@@ -87,8 +87,8 @@ module JSON
       # @param data [Hash] the parsed JSON object
       # @return [GenericObject] a new instance
       def json_create(data)
-        data = data.dup
-        data.delete JSON::GenericObject.json_create_id
+        data = data.dup.transform_keys { _1.to_s.to_sym }
+        data.delete JSON::GenericObject.json_create_id.to_sym
         self[data]
       end
 
@@ -174,7 +174,7 @@ module JSON
     # @param other [Object] an object responding to `to_hash`
     # @return [GenericObject] a new merged instance
     def |(other)
-      self.class[other.to_hash.merge(to_hash)]
+      self.class[other.to_hash.transform_keys { _1.to_s.to_sym }.merge(to_hash)]
     end
 
     # Returns the JSON-serializable representation of this object.
@@ -187,7 +187,11 @@ module JSON
     #
     # @return [Hash] a hash with `json_class` and all attributes
     def as_json(*)
-      { JSON::GenericObject.json_create_id => self.class.name }.merge to_hash
+      {
+        JSON::GenericObject.json_create_id.to_sym => self.class.name
+      }.merge(
+        to_hash
+      ).transform_keys(&:to_s)
     end
 
     # Serializes this GenericObject to a JSON string.

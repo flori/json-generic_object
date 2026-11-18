@@ -50,14 +50,35 @@ class JSONGenericObjectTest < Test::Unit::TestCase
     assert_equal JSON(json), JSON('{"json_class":"JSON::GenericObject","hello":"world"}')
   end
 
-  def test_json_create_id
+  def test_json_create_id_to_hash
+    id = JSON::GenericObject.json_create_id
+    assert_equal 'json_class', id
+
+    h = @go.to_hash
+    assert_nil h[id.to_sym]
+    assert_equal 1, h[:a]
+    assert_equal 2, h[:b]
+
+    assert_equal %i[ a b ], h.keys
+
+    go = JSON::GenericObject.json_create(
+      id => 'JSON::GenericObject', 'a' => 42
+    )
+    assert_kind_of JSON::GenericObject, go
+    assert_equal 42, go.a
+    assert_nil go[:json_class]
+  end
+
+  def test_json_create_id_as_json
     id = JSON::GenericObject.json_create_id
     assert_equal 'json_class', id
 
     h = @go.as_json
     assert_equal 'JSON::GenericObject', h[id]
-    assert_equal 1, h[:a]
-    assert_equal 2, h[:b]
+    assert_equal 1, h['a']
+    assert_equal 2, h['b']
+
+    assert_equal %w[ json_class a b ], h.keys
 
     go = JSON::GenericObject.json_create(
       id => 'JSON::GenericObject', 'a' => 42

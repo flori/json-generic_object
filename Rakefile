@@ -24,5 +24,6 @@ GemHadar do
   development_dependency 'rake'
   development_dependency 'test-unit'
   development_dependency 'simplecov', '~> 1.3'
+  development_dependency 'debug'
   licenses << 'MIT'
 end
