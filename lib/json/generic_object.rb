@@ -137,7 +137,12 @@ module JSON
       #   go = JSON::GenericObject.load('{"hello":"world"}')
       #   go.hello  #=> "world"
       def load(source, proc = nil, opts = {})
-        result = ::JSON.load(source, proc, opts.merge(:object_class => self))
+        result =
+          if ::JSON.method(:load).parameters.any? { |pt,| pt == :keyrest }
+            ::JSON.load(source, proc, **opts.merge(:object_class => self))
+          else
+            ::JSON.load(source, proc, opts.merge(:object_class => self))
+          end
         result.nil? ? new : result
       end
 
