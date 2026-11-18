@@ -1,0 +1,9 @@
+.*.sw[pon]
+.AppleDouble
+.bundle
+.yardoc
+Gemfile.lock
+cscope.out
+doc
+pkg
+tags
